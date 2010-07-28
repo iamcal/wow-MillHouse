@@ -1,6 +1,6 @@
 MH = {};
 
-MH.Width = 100;
+MH.Width = 120;
 MH.TextPadding = 5;
 
 MH.defaults = {
@@ -125,8 +125,8 @@ function MH.BuildFrame()
 
 	MH.UIFrame = CreateFrame("Frame",nil,UIParent);
 	MH.UIFrame:SetFrameStrata("BACKGROUND")
-	MH.UIFrame:SetWidth(100)
-	MH.UIFrame:SetHeight(100)
+	MH.UIFrame:SetWidth(MH.Width);
+	MH.UIFrame:SetHeight(100);
 	MH.UIFrame:SetPoint(MH.options.frameRef, MH.options.frameX, MH.options.frameY);
 	MH.UIFrame:SetMovable(true);
 
@@ -237,10 +237,9 @@ function MH.UpdateFrame()
 		text = "|cFFFFFFCCNothing to mill\n";
 	end
 
-
 	MH.Text:SetText(text);
 	local h = MH.Text:GetHeight();
-	MH.UIFrame:SetHeight(MH.TextPadding + MH.TextPadding + 15 + h);
+	MH.UIFrame:SetHeight(MH.TextPadding + MH.TextPadding + 20 + h);
 end
 
 MH.Frame = CreateFrame("Frame");
