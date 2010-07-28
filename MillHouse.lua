@@ -179,6 +179,19 @@ end
 function MH.UpdateFrame()
 
 	--
+	-- do they have inscription?
+	--
+
+	local can = IsUsableSpell("Inscription");
+	if (can) then
+		MH.UIFrame:Show();
+	else
+		MH.UIFrame:Hide();
+		return;
+	end
+
+
+	--
 	-- build the list of herbs
 	--
 
