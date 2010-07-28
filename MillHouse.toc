@@ -1,0 +1,8 @@
+## Interface: 30300
+## Title : Mill House
+## Notes: Summarize which herbs you have to mill.
+## Author: Cal Henderson (Bees on Hyjal-US)
+## Version: 1.0
+## Dependencies: 
+## SavedVariablesPerCharacter: MillHouseDB
+MillHouse.lua
