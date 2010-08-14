@@ -300,6 +300,20 @@ function MH.UpdateFrame()
 	end
 
 
+	--
+	-- hide icons we wont show
+	--
+
+	for id,_ in pairs(MH.herb_map) do
+		if (not (MH.showStacks[id])) then
+			MH.Icons[id]:Hide();
+		end
+	end
+
+
+	--
+	-- generate display
+	--
 
 	if (showCount == 0) then
 
@@ -312,14 +326,6 @@ function MH.UpdateFrame()
 
 		MH.Text:SetText("");
 		local h = MH.Text:GetHeight();
-
-
-		-- hide others first
-		for id,_ in pairs(MH.herb_map) do
-			if (not (MH.showStacks[id])) then
-				MH.Icons[id]:Hide();
-			end
-		end
 
 
 		-- calc positions
