@@ -1,7 +1,17 @@
 MH = {};
 
-MH.Width = 120;
+-- /run print("|TInterface\\Icons\\inv_weapon_shortblade_05:0|t Hello")
+
 MH.TextPadding = 5;
+MH.IconSize = 34;
+MH.NumCols = 5;
+MH.IconGap = 2;
+MH.TextSize = 20;
+
+MH.Icons = {};
+MH.Textures = {};
+MH.Names = {};
+MH.showStacks = {};
 
 MH.defaults = {
 	hide = false,
@@ -123,6 +133,8 @@ end
 
 function MH.BuildFrame()
 
+	MH.Width = (MH.TextPadding * 2) + (MH.IconSize * MH.NumCols) + (MH.IconGap * (MH.NumCols - 1));
+
 	MH.UIFrame = CreateFrame("Frame",nil,UIParent);
 	MH.UIFrame:SetFrameStrata("BACKGROUND")
 	MH.UIFrame:SetWidth(MH.Width);
@@ -147,16 +159,68 @@ function MH.BuildFrame()
 	MH.Text:Show();
 
 	MH.Cover = CreateFrame("Button", nil, MH.UIFrame);
-	MH.Cover:SetFrameLevel(128);
+	MH.Cover:SetFrameLevel(100);
 	MH.Cover:SetAllPoints();
-	MH.Cover:EnableMouse(true);
-	MH.Cover:RegisterForClicks("AnyUp");
-	MH.Cover:RegisterForDrag("LeftButton");
-	MH.Cover:SetScript("OnDragStart", MH.OnDragStart);
-	MH.Cover:SetScript("OnDragStop", MH.OnDragStop);
-	MH.Cover:SetScript("OnClick", MH.OnClick);
+	MH.Mouseify(MH.Cover);
+
+	for id,_ in pairs(MH.herb_map) do
+
+		MH.Icons[id] = MH.CreateButton(0, 0, MH.IconSize, MH.IconSize, [[Interface\Icons\inv_weapon_shortblade_05]], id);
+		MH.Icons[id]:SetFrameLevel(101);
+	end
 
 	MH.UpdateFrame();
+end
+
+function MH.CreateButton(x, y, w, h, texture, key)
+
+	local b = CreateFrame("Button", nil, MH.UIFrame);
+	b:SetPoint("TOPLEFT", x, 0-y);
+	b:SetWidth(w);
+	b:SetHeight(h);
+	b:Hide();
+	b.key = key;
+
+	b.texture = b:CreateTexture(nil, "ARTWORK");
+	b.texture:SetAllPoints(b)
+	b.texture:SetTexture(texture)
+
+	b.label = b:CreateFontString(nil, "OVERLAY");
+	b.label:Show()
+	b.label:ClearAllPoints()
+	b.label:SetTextColor(1, 1, 1, 1);
+	b.label:SetFont([[Fonts\FRIZQT__.TTF]], MH.TextSize, "OUTLINE");
+	b.label:SetPoint("CENTER", b, "CENTER", 0, 0);
+	b.label:SetText(" ");
+
+	MH.Mouseify(b);
+
+	b:SetHitRectInsets(0, 0, 0, 0);
+	b:SetScript("OnEnter", function(self) MH.ShowTooltip(self.key); end);
+	b:SetScript("OnLeave", function() GameTooltip:Hide(); end);
+
+	return b;
+end
+
+function MH.Mouseify(f)
+
+	f:EnableMouse(true);
+	f:RegisterForClicks("AnyUp");
+	f:RegisterForDrag("LeftButton");
+	f:SetScript("OnDragStart", MH.OnDragStart);
+	f:SetScript("OnDragStop", MH.OnDragStop);
+	f:SetScript("OnClick", MH.OnClick);
+end
+
+function MH.ShowTooltip(itemId)
+
+	GameTooltip:SetOwner(MH.Icons[itemId], "ANCHOR_TOP", 0, 10);
+
+	GameTooltip:SetHyperlink(MH.Names[itemId]);
+	GameTooltip:AddLine("5-stacks to mill: "..MH.showStacks[itemId]);
+
+	GameTooltip:ClearAllPoints();
+	GameTooltip:Show();
 end
 
 function MH.OnDragStart(frame)
@@ -196,7 +260,6 @@ function MH.UpdateFrame()
 	--
 
 	local matched = {};
-	local names = {};
 
 	for bag = 1, 4, 1 do
 		local slots = GetContainerNumSlots(bag);
@@ -206,10 +269,12 @@ function MH.UpdateFrame()
 
 			if (MH.herb_map[itemId]) then
 
-				local _, qty, _, _, _ = GetContainerItemInfo(bag, slot);
+				local tex, qty, _, _, _ = GetContainerItemInfo(bag, slot);
 
 				matched[itemId] = (matched[itemId] or 0) + qty;
-				names[itemId] = GetContainerItemLink(bag, slot);
+
+				MH.Names[itemId] = GetContainerItemLink(bag, slot);
+				MH.Textures[itemId] =  tex;
 			end
 		end
 	end
@@ -219,8 +284,9 @@ function MH.UpdateFrame()
 	-- iterate
 	--
 
-	local text = "";
-	local added = false;
+	local showCount = 0;
+	local demo_idx = 0;
+	MH.showStacks = {};
 
 	for id, qty in pairs(matched) do
 
@@ -228,18 +294,66 @@ function MH.UpdateFrame()
 
 		if (stacks > 0) then
 
-			text = text .. string.format("%s : |cFF00FF00%d\n", names[id], stacks);
-			added = true;
+			MH.showStacks[id] = stacks;
+			showCount = showCount + 1;
 		end
 	end
 
-	if (not added) then
-		text = "|cFFFFFFCCNothing to mill\n";
+
+
+	if (showCount == 0) then
+
+		MH.Text:SetText("|cFFFFFFCCNothing to mill\n");
+		local h = MH.Text:GetHeight();
+
+		MH.UIFrame:SetHeight(MH.TextPadding + MH.TextPadding + 20 + h);
+
+	else
+
+		MH.Text:SetText("");
+		local h = MH.Text:GetHeight();
+
+
+		-- hide others first
+		for id,_ in pairs(MH.herb_map) do
+			if (not (MH.showStacks[id])) then
+				MH.Icons[id]:Hide();
+			end
+		end
+
+
+		-- calc positions
+		local x = 0;
+		local y = 30;
+		local rows = ceil(showCount / MH.NumCols);
+		local last_row_count = showCount - ((rows - 1) * MH.NumCols);
+		local last_row_offset = ((MH.NumCols - last_row_count) * (MH.IconSize + MH.IconGap)) / 2;
+		local idx = 0;
+
+		for id, qty in pairs(MH.showStacks) do
+
+			local icon = MH.Icons[id];
+			local row = floor(idx / MH.NumCols);
+			local col = idx - (row * MH.NumCols);
+
+			local x = MH.TextPadding + (MH.IconSize * col) + (MH.IconGap * col);
+			local y = MH.TextPadding + 20 + h + (MH.IconSize * row) + (MH.IconGap * row);
+
+			if (row == rows-1) then
+				x = x + last_row_offset;
+			end
+
+			icon:SetPoint("TOPLEFT", x, 0-y);
+			icon.texture:SetTexture(MH.Textures[id]);
+			icon.label:SetText(MH.showStacks[id]);
+			icon:Show();
+
+			idx = idx + 1;
+		end
+
+		MH.UIFrame:SetHeight(MH.TextPadding + MH.TextPadding + 20 + h + (MH.IconSize * rows) + (MH.IconGap * (rows - 1)));
 	end
 
-	MH.Text:SetText(text);
-	local h = MH.Text:GetHeight();
-	MH.UIFrame:SetHeight(MH.TextPadding + MH.TextPadding + 20 + h);
 end
 
 MH.Frame = CreateFrame("Frame");
