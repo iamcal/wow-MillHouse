@@ -38,7 +38,7 @@ MH.herbs = {
 	3355, -- Wild Steelbloom
 
 	3358, -- Khadgar's Whisker
-	3819, -- Wintersbite
+	3819, -- Dragon's Teeth
 	3818, -- Fadeleaf
 	3821, -- Goldthorn
 
@@ -51,7 +51,7 @@ MH.herbs = {
 	8838, -- Sungrass
 
 	13465, -- Mountain Silversage
-	13466, -- Plaguebloom
+	13466, -- Sorrowmoss
 	13467, -- Icecap
 	13463, -- Dreamfoil
 	13464, -- Golden Sansam
@@ -68,12 +68,18 @@ MH.herbs = {
 	36903, -- Adder's Tongue
 	36906, -- Icethorn
 	36905, -- Lichbloom
-	39969, -- Fire Seed
 	37921, -- Deadnettle
 	36901, -- Goldclover
 	36907, -- Talandra's Rose
 	36904, -- Tiger Lily
 	39970, -- Fire Leaf
+
+	52983, -- Cinderbloom
+	52985, -- Azshara's Veil
+	52984, -- Stormvine
+	52986, -- Heartblossom
+	52988, -- Whiptail
+	52987, -- Twilight Jasmine	
 };
 
 function MH.OnLoad()

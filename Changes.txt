@@ -4,3 +4,5 @@
 1.1
  * show icons instead of text
 
+1.2
+ * updated herbs list for cataclysm
